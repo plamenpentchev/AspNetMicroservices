@@ -11,10 +11,25 @@ namespace Catalog.API.Data
     {
         public static  void SeedData(IMongoCollection<Product> products)
         {
-            if (!products.Find<Product>(p => true).Any())
+            try
             {
-                products.InsertManyAsync(GetPreconfiguredProducts());
+                var prdcts = products.Find(p => true);
+                var any = prdcts.Any();
+                if (!any)
+                {
+                     products.InsertMany(GetPreconfiguredProducts());
+                }
+                else
+                {
+                    //noop
+                }
             }
+            catch (Exception )
+            {
+
+                throw;
+            }
+            
 
         }
 
@@ -81,7 +96,17 @@ namespace Catalog.API.Data
                     ImageFile = "product-6.png",
                     Price = 240.00M,
                     Category = "Home Kitchen"
-                }
+                },
+                new Product()
+                {
+                    Id = "602d2149e773f2a3990b47fb",
+                    Name = "IPhone X Plamen",
+                    Summary = "This phone is the company's biggest change to its flagship smartphone in years. It includes a borderless.",
+                    Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ut, tenetur natus doloremque laborum quos iste ipsum rerum obcaecati impedit odit illo dolorum ab tempora nihil dicta earum fugiat. Temporibus, voluptatibus. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ut, tenetur natus doloremque laborum quos iste ipsum rerum obcaecati impedit odit illo dolorum ab tempora nihil dicta earum fugiat. Temporibus, voluptatibus.",
+                    ImageFile = "product-1.png",
+                    Price = 950.00M,
+                    Category = "Smart Phone"
+                },
             };
         }
     }

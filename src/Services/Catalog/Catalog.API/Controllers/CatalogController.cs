@@ -39,6 +39,7 @@ namespace Catalog.API.Controllers
                 _logger.LogError($"Product wih id: {id}, not found.");
                 return NotFound();
             }
+            _logger.LogInformation($"Product wih id: {id}, was found.");
             return Ok(product);
         } 
 

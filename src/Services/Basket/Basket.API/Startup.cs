@@ -1,18 +1,15 @@
 using Basket.API.GrpcServices;
 using Basket.API.Repositories;
 using Discount.Grpc.Protos;
+using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Basket.API
 {
@@ -28,7 +25,7 @@ namespace Basket.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //adding the IDistributedCache to DI container
+            //adding the IDistributedCache(Redis) to DI container
             services.AddStackExchangeRedisCache( opts =>
                 {
                     opts.Configuration = Configuration.GetValue<string>("CacheSettings:ConnectionString");
@@ -40,16 +37,29 @@ namespace Basket.API
                 config.AssumeDefaultVersionWhenUnspecified = true;
                 config.ReportApiVersions = true;
             });
-            //add repository to DI container
+            //General configuration, add repository to DI container
             services.AddScoped<IBasketRepository, BasketRepository>();
+            services.AddAutoMapper(typeof(Startup));
 
-            //add compiler generated grpc client to the DI container, to be used
+            //Grpc configuration, sync communication, add compiler generated grpc client to the DI container, to be used
             //in the DiscountGrpcService abstraction.
             services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>
                 ( o => o.Address = new Uri(Configuration.GetValue<string>("GrpcSettings:DiscountUrl")));
 
             //add the DiscountGrpcService abstraction itself.
             services.AddScoped<DiscountGrpcService>();
+
+            // MassTransit-Rabitmq configuration,async communication.
+            services.AddMassTransit( config => 
+            {
+                config.UsingRabbitMq(configure: 
+                    (ctx, cfg) => 
+                    {
+                        cfg.Host(Configuration.GetValue<string>("EventBusSettings:HostAddress"));
+                    });
+            });
+
+            services.AddMassTransitHostedService();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

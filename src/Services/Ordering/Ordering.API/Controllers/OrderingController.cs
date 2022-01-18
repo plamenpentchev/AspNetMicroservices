@@ -33,7 +33,10 @@ namespace Ordering.API.Controllers
         [HttpPost(Name = "CheckOutOrder")]
         [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<int>> CheckoutOrder([FromBody] CheckoutOrderCommand command)
-        => Ok(await _mediator.Send(command));
+        {
+
+            return Ok(await _mediator.Send(command));
+        }
 
         [HttpPut(Name = "UpdateOrder")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]

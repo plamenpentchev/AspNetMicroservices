@@ -61,10 +61,10 @@ namespace Ordering.Application.Features.Orders.Command.CheckoutOrder
                 var orderEntity = _mapper.Map<Order>(request);
                 var newOrder = await _orderRepository.AddAsync(orderEntity);
                 _logger.LogInformation($"New order [id:{newOrder.Id}] successfully created.");
-                if(!await SendMail(newOrder))
-                {
-                    _logger.LogError($"SendMail failed.");
-                }
+                //if(!await SendMail(newOrder))
+                //{
+                //    _logger.LogError($"SendMail failed.");
+                //}
                 return newOrder.Id;
             }
 
